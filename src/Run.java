@@ -66,7 +66,12 @@ public class Run {
             line = br.readLine();
             System.out.print("%");
             while (line != null) {
-                Document document = new Document(line.substring(3), line.substring(0, 1));
+                String[] split = line.split("\t");
+                if (split.length != 2)
+                    return;
+                String label = split[0];
+                String text = split[1].replace('"', ' ').trim();
+                Document document = new Document(text, label);
                 if (Math.random() < 0.75) {
                     trainDocuments.add(document);
                 } else {
