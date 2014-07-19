@@ -34,7 +34,7 @@ public class Document {
      */
     public double getWordCount(String word){
         if (!this.wordsWithImprovedCounts.containsKey(word.trim())) {
-            return 0;
+            return 0.0;
         }
         return this.wordsWithImprovedCounts.get(word);
     }
@@ -50,27 +50,20 @@ public class Document {
     }
 
     public Document(String text, String label) {
-        this.wordsWithCounts = new HashMap<String, Integer>();
-        this.wordsWithImprovedCounts = new HashMap<String, Double>();
+        this.wordsWithCounts = new HashMap<>();
+        this.wordsWithImprovedCounts = new HashMap<>();
         this._label = label;
         this.transformTextIntoWordsWithCounts(text);
     }
 
     private void transformTextIntoWordsWithCounts(String text) {
-       /* String[] punctuationMarks = { ".", ",", ";", ":", "#", "'", "/", "\\"
-                , "!", "\"", "§", "$", "%", "&", "(", ")", "-", "_", "="
-                , "?", "`", "´"};
-
-        for (String item : punctuationMarks) {
-            text.replaceAll(item, "");
-        }*/
         String[] seperatedText = text.split(" ");
-        for(String item : seperatedText) {
+        for(String s : seperatedText) {
+            String item = s.trim();
             if (wordsWithCounts.containsKey(item)) {
                 int count = wordsWithCounts.get(item);
                 wordsWithCounts.put(item, ++count);
-            }
-            else {
+            } else {
                 wordsWithCounts.put(item, 1);
             }
         }
@@ -86,11 +79,11 @@ public class Document {
      */
     public void calculateImprovedCounts(ArrayList<Document> allDocuments) {
         for(Map.Entry<String, Integer> entry : this.wordsWithCounts.entrySet()) {
-            double improvedCount = entry.getValue();
+            double improvedCount;
             // First improvement for TWCNB, compare §4.1 TF tranform
             improvedCount = Math.log(entry.getValue() + 1);
             // Second improvement for TWCNB, compare §4.2 IDF transform
-            improvedCount *= Math.log(allDocuments.size() / idfTranformHelper(allDocuments, entry.getKey()));
+            improvedCount *= Math.log(allDocuments.size() / idfTransformHelper(allDocuments, entry.getKey()));
             this.wordsWithImprovedCounts.put(entry.getKey(), improvedCount);
         }
 
@@ -102,14 +95,13 @@ public class Document {
         }
     }
 
-    private double idfTranformHelper(ArrayList<Document> allDocuments, String word) {
+    private double idfTransformHelper(ArrayList<Document> allDocuments, String word) {
         double returnValue = 0;
         for(Document document : allDocuments) {
             if (document.containsWord(word)) {
                 returnValue++;
             }
         }
-
         return returnValue;
     }
 
