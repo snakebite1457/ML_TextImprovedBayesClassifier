@@ -29,8 +29,8 @@ public class Document {
      * Gets the improved word count parameter. Returns always
      * 0 before calculateImprovedCounts isn't called.
      *
-     * @param word
-     * @return
+     * @param word tba
+     * @return tba
      */
     public double getWordCount(String word){
         if (!this.wordsWithImprovedCounts.containsKey(word.trim())) {
