@@ -110,7 +110,9 @@ public class BayesTextClassifier {
         for (String c : this.label) {
             double weights = 0;
             for (String word : document.getWords()) {
-                weights += document.getWordCount(word) * this.weight.get(c).get(word);
+                if (this.weight.get(c).containsKey(word)) {
+                    weights += document.getWordCount(word) * this.weight.get(c).get(word);
+                }
             }
             sums.put(c, weights);
         }

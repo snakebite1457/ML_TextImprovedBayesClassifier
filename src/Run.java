@@ -4,67 +4,48 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Run {
-
     private static ArrayList<Document> trainDocuments = new ArrayList<>();
     private static ArrayList<Document> testDocuments = new ArrayList<>();
 
     public static void main(String[] argv) {
-        System.out.println("### Reading and creating documents: ###");
-        createDocuments("data/100.txt");
-        System.out.println("### READY! ###");
+        System.out.print("Reading and creating documents...");
+        createDocuments("data/trg.txt");
+        System.out.print("done!\n");
 
         System.out.println("We got " + trainDocuments.size() + " training sets and " + testDocuments.size() + " test sets.");
 
         long startTime = System.currentTimeMillis();
-        System.out.println("### Calculating improved counts for documents: ###");
-        int allTrainingSets = trainDocuments.size();
-        int current = 0;
-        int percentage = 0;
-        System.out.print("%");
+        System.out.print("Calculating improved counts for documents...");
         for (Document document : trainDocuments) {
             document.calculateImprovedCounts(trainDocuments);
-            //System.out.println(++current + "/" + allTrainingSets);
-            if (++current % (allTrainingSets/100) == 0) {
-                System.out.print(" " + ++percentage);
-            }
         }
-        System.out.println();
-        System.out.println("### DONE ###");
+        System.out.print("done!\n");
         long endTime = System.currentTimeMillis();
         System.out.println((endTime - startTime)/1000 + "s");
 
         BayesTextClassifier bayesTextClassifier = new BayesTextClassifier(trainDocuments);
 
-
         int countCorrect = 0;
         startTime = System.currentTimeMillis();
-        System.out.println("### Testing documents: ###");
+        System.out.println("Testing documents...");
         for (Document document : testDocuments) {
             String label = bayesTextClassifier.classify(document);
+            System.out.println(label + "/" + document.getLabel());
             if (label.equals(document.getLabel())) {
                 countCorrect++;
             }
         }
-        System.out.println("### DONE ###");
+        System.out.print("done!\n");
         endTime = System.currentTimeMillis();
         System.out.println((endTime - startTime)/1000 + "s");
-        System.out.println(countCorrect / testDocuments.size() + " correct labeled documents.");
+        System.out.println(countCorrect*1.0 / testDocuments.size() + " correct labeled documents.");
     }
 
     public static void createDocuments(String filePath) {
         try {
             BufferedReader br = new BufferedReader(new FileReader(filePath));
             String line = br.readLine();
-            int allDocuments = 0;
-            int current = 0;
-            int percentage = 0;
-            while (line != null) {
-                allDocuments++;
-                line = br.readLine();
-            }
-            br = new BufferedReader(new FileReader(filePath));
-            line = br.readLine();
-            System.out.print("%");
+
             while (line != null) {
                 String[] split = line.split("\t");
                 if (split.length != 2)
@@ -76,9 +57,6 @@ public class Run {
                     trainDocuments.add(document);
                 } else {
                     testDocuments.add(document);
-                }
-                if (++current % (allDocuments/100) == 0) {
-                    System.out.print(" " + ++percentage);
                 }
                 line = br.readLine();
             }
