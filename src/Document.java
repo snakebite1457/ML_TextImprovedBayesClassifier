@@ -14,12 +14,15 @@ import java.util.Map;
  */
 public class Document {
     private HashMap<String, Integer> wordsWithCounts;
-    private HashMap<String, Double> wordsWithImporvedCounts;
+    private HashMap<String, Double> wordsWithImprovedCounts;
     private String _label;
-
 
     public String getLabel() {
         return this._label;
+    }
+
+    public java.util.Set<String> getWords() {
+        return wordsWithCounts.keySet();
     }
 
     /**
@@ -30,11 +33,10 @@ public class Document {
      * @return
      */
     public double getWordCount(String word){
-        if (!this.wordsWithImporvedCounts.containsKey(word.trim())) {
+        if (!this.wordsWithImprovedCounts.containsKey(word.trim())) {
             return 0;
         }
-
-        return this.wordsWithImporvedCounts.get(word);
+        return this.wordsWithImprovedCounts.get(word);
     }
 
     /**
@@ -49,8 +51,7 @@ public class Document {
 
     public Document(String text, String label) {
         this.wordsWithCounts = new HashMap<String, Integer>();
-        this.wordsWithImporvedCounts = new HashMap<String, Double>();
-
+        this.wordsWithImprovedCounts = new HashMap<String, Double>();
         this._label = label;
         this.transformTextIntoWordsWithCounts(text);
     }
@@ -63,7 +64,6 @@ public class Document {
         for (String item : punctuationMarks) {
             text.replaceAll(item, "");
         }*/
-
         String[] seperatedText = text.split(" ");
         for(String item : seperatedText) {
             if (wordsWithCounts.containsKey(item)) {
@@ -87,28 +87,22 @@ public class Document {
     public void calculateImprovedCounts(ArrayList<Document> allDocuments) {
         for(Map.Entry<String, Integer> entry : this.wordsWithCounts.entrySet()) {
             double improvedCount = entry.getValue();
-
             // First improvement for TWCNB, compare §4.1 TF tranform
             improvedCount = Math.log(entry.getValue() + 1);
-
             // Second improvement for TWCNB, compare §4.2 IDF transform
             improvedCount *= Math.log(allDocuments.size() / idfTranformHelper(allDocuments, entry.getKey()));
-
-            this.wordsWithImporvedCounts.put(entry.getKey(), improvedCount);
+            this.wordsWithImprovedCounts.put(entry.getKey(), improvedCount);
         }
 
         for(Map.Entry<String, Integer> entry : this.wordsWithCounts.entrySet()) {
-            double improvedCount = this.wordsWithImporvedCounts.get(entry.getKey());
-
+            double improvedCount = this.wordsWithImprovedCounts.get(entry.getKey());
             // Third improvement for TWCNB, compare §4.3 length norm
             improvedCount /= Math.sqrt(this.lengthNormHelper());
-
-            this.wordsWithImporvedCounts.put(entry.getKey(), improvedCount);
+            this.wordsWithImprovedCounts.put(entry.getKey(), improvedCount);
         }
     }
 
     private double idfTranformHelper(ArrayList<Document> allDocuments, String word) {
-
         double returnValue = 0;
         for(Document document : allDocuments) {
             if (document.containsWord(word)) {
@@ -121,11 +115,9 @@ public class Document {
 
     private double lengthNormHelper(){
         double returnValue = 0;
-
-        for (Map.Entry<String, Double> entry : this.wordsWithImporvedCounts.entrySet()) {
+        for (Map.Entry<String, Double> entry : this.wordsWithImprovedCounts.entrySet()) {
             returnValue = entry.getValue() * entry.getValue();
         }
-
         return returnValue;
     }
 
@@ -133,12 +125,10 @@ public class Document {
         if(obj == null) {
             return false;
         }
-
         if (obj instanceof Document) {
             Document other = (Document)obj;
             return other.getLabel().equals(this._label);
         }
-
         return false;
     }
 }
