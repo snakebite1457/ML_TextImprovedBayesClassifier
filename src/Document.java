@@ -56,7 +56,24 @@ public class Document {
     }
 
     private void transformTextIntoWordsWithCounts(String text) {
-        //TODO: Implement please
+       /* String[] punctuationMarks = { ".", ",", ";", ":", "#", "'", "/", "\\"
+                , "!", "\"", "§", "$", "%", "&", "(", ")", "-", "_", "="
+                , "?", "`", "´"};
+
+        for (String item : punctuationMarks) {
+            text.replaceAll(item, "");
+        }*/
+
+        String[] seperatedText = text.split(" ");
+        for(String item : seperatedText) {
+            if (wordsWithCounts.containsKey(item)) {
+                int count = wordsWithCounts.get(item);
+                wordsWithCounts.put(item, ++count);
+            }
+            else {
+                wordsWithCounts.put(item, 1);
+            }
+        }
     }
 
     /**

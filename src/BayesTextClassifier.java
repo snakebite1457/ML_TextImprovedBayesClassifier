@@ -14,7 +14,8 @@ public class BayesTextClassifier {
     public BayesTextClassifier() {
         this.allWordsWithWeightsForEachLabel = new HashMap<String, HashMap<String, Integer>>();
 
-        //TODO: Read files and create documents
+
+
         //TODO: Implement step 4 to 6 from paper (WEIGHTS)
         //TODO: Implement a classify method which works like step 8
     }
