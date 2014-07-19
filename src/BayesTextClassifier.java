@@ -13,7 +13,7 @@ public class BayesTextClassifier {
     // Stores the weight for each (label,word) pair
     private HashMap<String, HashMap<String, Double>> weight; // HashMap<label,HashMap<word, weight>>
     // Stores all existent labels
-    private ArrayList<String> label;
+    private Set<String> label;
     // Stores all words
     private Set<String> words;
     // Stores all documents
@@ -21,8 +21,9 @@ public class BayesTextClassifier {
 
     public BayesTextClassifier(ArrayList<Document> documents) {
         this.theta = new HashMap<>();
-        this.label = new ArrayList<>();
+        this.label = new HashSet<>();
         this.words = new HashSet<>();
+        this.weight = new HashMap<>();
         this.documents = documents;
 
         for (Document document : this.documents) {
@@ -32,33 +33,52 @@ public class BayesTextClassifier {
 
         System.out.println("Starting step 4");
         // Step 4
+        int all = this.words.size();
+        double maxTheta = 0;
+        // c
         for (String label : this.label) {
+            System.out.println("Working on label:" + label);
+            int current = 0;
+            int percentage = 0;
             this.theta.put(label, new HashMap<String, Double>());
+
+            int alphai = 1;
+            int sumOfAlphas = this.words.size() * alphai;
+
+            long denumerator = 0;
+            // j
+            for (Document document : this.documents) {
+                // Yj != c
+                if (document.getLabel().trim().equals(label.trim())) {
+                    continue;
+                }
+                for (String docWord : document.getWords()) {
+                    denumerator += document.getWordCount(docWord);
+                }
+            }
+            denumerator += sumOfAlphas;
+
+            // i
             for (String word : this.words) {
-                int alphai = 1;
-                int sumOfAlphas = 0;
 
                 long numerator = 0;
+                // j
                 for (Document document : this.documents) {
+                    // Yj != c
                     if (document.getLabel().trim().equals(label.trim())) {
                         continue;
                     }
-                    numerator += document.getWordCount(word) + alphai;
-                    sumOfAlphas += alphai;
+                    numerator += document.getWordCount(word);
                 }
-
-                long denumerator = 0;
-                for (Document document : this.documents) {
-                    if (document.getLabel().trim().equals(label.trim())) {
-                        continue;
-                    }
-                    for (String docWord : document.getWords()) {
-                        denumerator += document.getWordCount(docWord) + sumOfAlphas;
-                    }
-                }
+                numerator += alphai;
 
                 double theta = numerator / denumerator;
                 this.theta.get(label).put(word, theta);
+                if (theta > maxTheta)
+                    maxTheta = theta;
+                if (++current % (all/100) == 0) {
+                    System.out.print(" " + ++percentage);
+                }
             }
         }
 

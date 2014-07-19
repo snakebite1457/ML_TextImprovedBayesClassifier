@@ -10,7 +10,7 @@ public class Run {
 
     public static void main(String[] argv) {
         System.out.println("### Reading and creating documents: ###");
-        createDocuments("data/trg.txt");
+        createDocuments("data/100.txt");
         System.out.println("### READY! ###");
 
         System.out.println("We got " + trainDocuments.size() + " training sets and " + testDocuments.size() + " test sets.");
