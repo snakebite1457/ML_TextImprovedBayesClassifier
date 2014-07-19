@@ -16,30 +16,24 @@ public class BayesTextClassifier {
     private Set<String> label;
     // Stores all words
     private Set<String> words;
-    // Stores all documents
-    private ArrayList<Document> documents;
 
     public BayesTextClassifier(ArrayList<Document> documents) {
         this.theta = new HashMap<>();
         this.label = new HashSet<>();
         this.words = new HashSet<>();
         this.weight = new HashMap<>();
-        this.documents = documents;
 
-        for (Document document : this.documents) {
+        for (Document document : documents) {
             this.label.add(document.getLabel());
             this.words.addAll(document.getWords());
         }
 
         System.out.println("Starting step 4");
         // Step 4
-        int all = this.words.size();
         double maxTheta = 0;
         // c
         for (String label : this.label) {
             System.out.println("Working on label:" + label);
-            int current = 0;
-            int percentage = 0;
             this.theta.put(label, new HashMap<String, Double>());
 
             int alphai = 1;
@@ -47,7 +41,7 @@ public class BayesTextClassifier {
 
             long denumerator = 0;
             // j
-            for (Document document : this.documents) {
+            for (Document document : documents) {
                 // Yj != c
                 if (document.getLabel().trim().equals(label.trim())) {
                     continue;
@@ -60,10 +54,9 @@ public class BayesTextClassifier {
 
             // i
             for (String word : this.words) {
-
                 long numerator = 0;
                 // j
-                for (Document document : this.documents) {
+                for (Document document : documents) {
                     // Yj != c
                     if (document.getLabel().trim().equals(label.trim())) {
                         continue;
@@ -72,13 +65,11 @@ public class BayesTextClassifier {
                 }
                 numerator += alphai;
 
-                double theta = numerator / denumerator;
+                double theta = 1.0*numerator / 1.0*denumerator;
                 this.theta.get(label).put(word, theta);
+
                 if (theta > maxTheta)
                     maxTheta = theta;
-                if (++current % (all/100) == 0) {
-                    System.out.print(" " + ++percentage);
-                }
             }
         }
 
@@ -110,6 +101,7 @@ public class BayesTextClassifier {
 
         // just a little garbage collection
         this.theta = null;
+        this.words = null;
     }
 
     public String classify(Document document) {
@@ -131,6 +123,4 @@ public class BayesTextClassifier {
         }
         return label;
     }
-
-
 }

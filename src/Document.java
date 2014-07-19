@@ -17,6 +17,13 @@ public class Document {
     private HashMap<String, Double> wordsWithImprovedCounts;
     private String _label;
 
+    public Document(String text, String label) {
+        this.wordsWithCounts = new HashMap<>();
+        this.wordsWithImprovedCounts = new HashMap<>();
+        this._label = label;
+        this.transformTextIntoWordsWithCounts(text);
+    }
+
     public String getLabel() {
         return this._label;
     }
@@ -49,17 +56,13 @@ public class Document {
         return this.wordsWithCounts.containsKey(word);
     }
 
-    public Document(String text, String label) {
-        this.wordsWithCounts = new HashMap<>();
-        this.wordsWithImprovedCounts = new HashMap<>();
-        this._label = label;
-        this.transformTextIntoWordsWithCounts(text);
-    }
-
     private void transformTextIntoWordsWithCounts(String text) {
         String[] seperatedText = text.split(" ");
         for(String s : seperatedText) {
             String item = s.trim();
+            if (item.length() < 1) {
+                continue;
+            }
             if (wordsWithCounts.containsKey(item)) {
                 int count = wordsWithCounts.get(item);
                 wordsWithCounts.put(item, ++count);
@@ -86,7 +89,6 @@ public class Document {
             improvedCount *= Math.log(allDocuments.size() / idfTransformHelper(allDocuments, entry.getKey()));
             this.wordsWithImprovedCounts.put(entry.getKey(), improvedCount);
         }
-
         for(Map.Entry<String, Integer> entry : this.wordsWithCounts.entrySet()) {
             double improvedCount = this.wordsWithImprovedCounts.get(entry.getKey());
             // Third improvement for TWCNB, compare §4.3 length norm
