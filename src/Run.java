@@ -1,5 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Dennis Meyer, Sebastian Brodehl
@@ -119,6 +121,89 @@ public class Run {
             }
             System.out.println();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Just compares multiple classifications
+     */
+    public static void getFinalClassification() {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("data/tst_classification_final.txt"));
+
+            BufferedReader c0 = new BufferedReader(new FileReader("data/tst_classification_1405851034.txt"));
+            BufferedReader c1 = new BufferedReader(new FileReader("data/tst_classification_1405851126.txt"));
+            BufferedReader c2 = new BufferedReader(new FileReader("data/tst_classification_1405851213.txt"));
+            BufferedReader c3 = new BufferedReader(new FileReader("data/tst_classification_1405851293.txt"));
+            BufferedReader c4 = new BufferedReader(new FileReader("data/tst_classification_1405851415.txt"));
+
+            String c0Label = c0.readLine();
+            String c1Label = c1.readLine();
+            String c2Label = c2.readLine();
+            String c3Label = c3.readLine();
+            String c4Label = c4.readLine();
+
+            HashMap<String, Integer> counts = new HashMap<>();
+            while (c0Label != null) {
+                counts.clear();
+                if (counts.containsKey(c0Label)) {
+                    int count = counts.get(c0Label) + 1;
+                    counts.put(c0Label, count);
+                } else
+                    counts.put(c0Label, 1);
+
+                if (counts.containsKey(c1Label)) {
+                    int count = counts.get(c1Label) + 1;
+                    counts.put(c1Label, count);
+                } else
+                    counts.put(c1Label, 1);
+
+                if (counts.containsKey(c2Label)) {
+                    int count = counts.get(c2Label) + 1;
+                    counts.put(c2Label, count);
+                } else
+                    counts.put(c2Label, 1);
+
+                if (counts.containsKey(c3Label)) {
+                    int count = counts.get(c3Label) + 1;
+                    counts.put(c3Label, count);
+                } else
+                    counts.put(c3Label, 1);
+
+                if (counts.containsKey(c4Label)) {
+                    int count = counts.get(c4Label) + 1;
+                    counts.put(c4Label, count);
+                } else
+                    counts.put(c4Label, 1);
+
+                int maxCount = -1;
+                String label = "";
+                for (Map.Entry<String, Integer> entry : counts.entrySet()) {
+                    if (entry.getValue() > maxCount) {
+                        label = entry.getKey();
+                    }
+                }
+                if (label.equals("")) {
+                    throw new Exception();
+                }
+                bw.write(label);
+                bw.newLine();
+
+                c0Label = c0.readLine();
+                c1Label = c1.readLine();
+                c2Label = c2.readLine();
+                c3Label = c3.readLine();
+                c4Label = c4.readLine();
+            }
+            bw.flush();
+            bw.close();
+            c0.close();
+            c1.close();
+            c2.close();
+            c3.close();
+            c4.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
