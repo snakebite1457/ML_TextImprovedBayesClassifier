@@ -1,21 +1,29 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
- * This class is in charge of a training document.
+ * This class is in charge of a document.
  * It calculates the counts for the words and stores
- * them into a data structure.
+ * them into a data structure. If this is a training
+ * document, the label is already set to a class.
+ * Otherwise one can use the BayesTextClassifier
+ * to classify this document.
  *
  * This class is designed for the BayesTextClassifier.
  *
  * @author Dennis Meyer, Sebastian Brodehl
- *
+ * machine learning summer term 2014
  */
 public class Document {
     private HashMap<String, Integer> wordsWithCounts;
     private HashMap<String, Double> wordsWithImprovedCounts;
     private String _label;
+
+    private boolean TF = true; // §4.1 TF transform
+    private boolean IDF = true; // §4.2 IDF transform
+    private boolean LN = true; // §4.3 length norm
 
     public Document(String text, String label) {
         this.wordsWithCounts = new HashMap<>();
@@ -36,18 +44,23 @@ public class Document {
      * Gets the improved word count parameter. Returns always
      * 0 before calculateImprovedCounts isn't called.
      *
-     * @param word tba
-     * @return tba
+     * @param word the word the count is returned for
+     * @return double value 'improved count'
      */
     public double getImprovedWordCount(String word){
         if (!this.wordsWithImprovedCounts.containsKey(word.trim())) {
             return 0.0;
         }
         return this.wordsWithImprovedCounts.get(word);
-
-        //return wordsWithCounts.get(word);
     }
 
+    /**
+     * Gets the word count for a given word.
+     * Returns zero if the word isn't in the text.
+     *
+     * @param word the word the count is returned for
+     * @return double value 'simple count'
+     */
     public int getWordCount(String word) {
         if (!this.wordsWithCounts.containsKey(word.trim())) {
             return 0;
@@ -56,20 +69,31 @@ public class Document {
     }
 
     /**
-     * Checks of the given word occur in this document
+     * Checks of the given word occurs in this document
      *
      * @param word The word which will be checked
-     * @return True if it occur otherwise false
+     * @return True if it occurs, false otherwise
      */
     public boolean containsWord(String word) {
         return this.wordsWithCounts.containsKey(word);
     }
 
+    /**
+     * Splits the text of the document to single words
+     * by white spaces and strips the first and the
+     * last double quotes.
+     *
+     * @Improvement Didn't insert words if the length is
+     * smaller than 4.
+     *
+     * @param text The text which will be splitted
+     */
     private void transformTextIntoWordsWithCounts(String text) {
+        Pattern numberRE = Pattern.compile("[0-9]+");
         String[] seperatedText = text.split(" ");
         for(String s : seperatedText) {
             String item = s.trim();
-            if (item.length() < 4) {
+            if (item.length() < 1 ||numberRE.matcher(item).matches()) {
                 continue;
             }
             if (wordsWithCounts.containsKey(item)) {
@@ -91,21 +115,25 @@ public class Document {
      */
     public void calculateImprovedCounts(ArrayList<Document> allDocuments) {
         for(Map.Entry<String, Integer> entry : this.wordsWithCounts.entrySet()) {
-            double improvedCount;
-            // First improvement for TWCNB, compare §4.1 TF tranform
-            improvedCount = Math.log(entry.getValue() + 1);
+            double improvedCount = entry.getValue();
+            // First improvement for TWCNB, compare §4.1 TF trasnform
+            if (TF) {
+                improvedCount = Math.log(entry.getValue() + 1);
+            }
             // Second improvement for TWCNB, compare §4.2 IDF transform
-            improvedCount = improvedCount * (Math.log(allDocuments.size() / idfTransformHelper(allDocuments, entry.getKey())));
+            if (IDF) {
+                improvedCount = improvedCount * (Math.log(allDocuments.size() / idfTransformHelper(allDocuments, entry.getKey())));
+            }
             this.wordsWithImprovedCounts.put(entry.getKey(), improvedCount);
         }
-
-
-        double lenghtNorm = this.lengthNormHelper();
-        for(Map.Entry<String, Integer> entry : this.wordsWithCounts.entrySet()) {
-            double improvedCount = this.wordsWithImprovedCounts.get(entry.getKey());
-            // Third improvement for TWCNB, compare §4.3 length norm
-            improvedCount = improvedCount / Math.sqrt(lenghtNorm);
-            this.wordsWithImprovedCounts.put(entry.getKey(), improvedCount);
+        if (LN) {
+            double lenghtNorm = this.lengthNormHelper();
+            for(Map.Entry<String, Integer> entry : this.wordsWithCounts.entrySet()) {
+                double improvedCount = this.wordsWithImprovedCounts.get(entry.getKey());
+                // Third improvement for TWCNB, compare §4.3 length norm
+                improvedCount = 1.0*improvedCount / Math.sqrt(lenghtNorm);
+                this.wordsWithImprovedCounts.put(entry.getKey(), improvedCount);
+            }
         }
     }
 
