@@ -39,11 +39,20 @@ public class Document {
      * @param word tba
      * @return tba
      */
-    public double getWordCount(String word){
+    public double getImprovedWordCount(String word){
         if (!this.wordsWithImprovedCounts.containsKey(word.trim())) {
             return 0.0;
         }
         return this.wordsWithImprovedCounts.get(word);
+
+        //return wordsWithCounts.get(word);
+    }
+
+    public int getWordCount(String word) {
+        if (!this.wordsWithCounts.containsKey(word.trim())) {
+            return 0;
+        }
+        return this.wordsWithCounts.get(word);
     }
 
     /**
@@ -60,7 +69,7 @@ public class Document {
         String[] seperatedText = text.split(" ");
         for(String s : seperatedText) {
             String item = s.trim();
-            if (item.length() < 1) {
+            if (item.length() < 4) {
                 continue;
             }
             if (wordsWithCounts.containsKey(item)) {
@@ -86,13 +95,16 @@ public class Document {
             // First improvement for TWCNB, compare §4.1 TF tranform
             improvedCount = Math.log(entry.getValue() + 1);
             // Second improvement for TWCNB, compare §4.2 IDF transform
-            improvedCount *= Math.log(allDocuments.size() / idfTransformHelper(allDocuments, entry.getKey()));
+            improvedCount = improvedCount * (Math.log(allDocuments.size() / idfTransformHelper(allDocuments, entry.getKey())));
             this.wordsWithImprovedCounts.put(entry.getKey(), improvedCount);
         }
+
+
+        double lenghtNorm = this.lengthNormHelper();
         for(Map.Entry<String, Integer> entry : this.wordsWithCounts.entrySet()) {
             double improvedCount = this.wordsWithImprovedCounts.get(entry.getKey());
             // Third improvement for TWCNB, compare §4.3 length norm
-            improvedCount /= Math.sqrt(this.lengthNormHelper());
+            improvedCount = improvedCount / Math.sqrt(lenghtNorm);
             this.wordsWithImprovedCounts.put(entry.getKey(), improvedCount);
         }
     }
@@ -110,7 +122,7 @@ public class Document {
     private double lengthNormHelper(){
         double returnValue = 0;
         for (Map.Entry<String, Double> entry : this.wordsWithImprovedCounts.entrySet()) {
-            returnValue = entry.getValue() * entry.getValue();
+            returnValue += (entry.getValue() * entry.getValue());
         }
         return returnValue;
     }

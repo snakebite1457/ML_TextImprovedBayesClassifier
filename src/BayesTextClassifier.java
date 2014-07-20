@@ -39,7 +39,7 @@ public class BayesTextClassifier {
             int alphai = 1;
             int sumOfAlphas = this.words.size() * alphai;
 
-            long denumerator = 0;
+            double denumerator = 0;
             // j
             for (Document document : documents) {
                 // Yj != c
@@ -47,21 +47,21 @@ public class BayesTextClassifier {
                     continue;
                 }
                 for (String docWord : document.getWords()) {
-                    denumerator += document.getWordCount(docWord);
+                    denumerator += document.getImprovedWordCount(docWord);
                 }
             }
             denumerator += sumOfAlphas;
 
             // i
             for (String word : this.words) {
-                long numerator = 0;
+                double numerator = 0;
                 // j
                 for (Document document : documents) {
                     // Yj != c
                     if (document.getLabel().trim().equals(label.trim())) {
                         continue;
                     }
-                    numerator += document.getWordCount(word);
+                    numerator += document.getImprovedWordCount(word);
                 }
                 numerator += alphai;
 
