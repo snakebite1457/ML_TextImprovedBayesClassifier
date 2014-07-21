@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The Naive Bayes classifier was improved by implementing
@@ -25,13 +22,17 @@ import java.util.Set;
  */
 public class BayesTextClassifier {
     // Stores for each (label,word) pair the theta value
-    private HashMap<String, HashMap<String, Double>> theta; // HashMap<label,HashMap<word, theta>>
+    private Map<String, Map<String, Double>> theta; // HashMap<label,HashMap<word, theta>>
     // Stores the weight for each (label,word) pair
-    private HashMap<String, HashMap<String, Double>> weight; // HashMap<label,HashMap<word, weight>>
+    private Map<String, Map<String, Double>> weight; // HashMap<label,HashMap<word, weight>>
     // Stores all existent labels
     private Set<String> label;
     // Stores all words
     private Set<String> words;
+    // Stores all words with counts
+    private  Map<String, Double> wordsWithCounts;
+    // usage in % of words
+    double wordThreshold = .1;
 
     /**
      * Constructs a new TWCNB with the given training documents
@@ -42,11 +43,43 @@ public class BayesTextClassifier {
         this.label = new HashSet<>();
         this.words = new HashSet<>();
         this.weight = new HashMap<>();
+        this.wordsWithCounts = new HashMap<>();
 
         for (Document document : trainingDocuments) {
             this.label.add(document.getLabel());
             this.words.addAll(document.getWords());
+            for (String word : document.getWords()) {
+                if (this.wordsWithCounts.containsKey(word)) {
+                    double count = this.wordsWithCounts.get(word) + document.getImprovedWordCount(word);
+                    this.wordsWithCounts.put(word, count);
+                } else {
+                    this.wordsWithCounts.put(word, document.getImprovedWordCount(word));
+                }
+            }
         }
+
+        int prevWordSize = this.words.size();
+        LinkedHashMap<String, Double> sortedMap = (LinkedHashMap<String, Double>) sortByValues(this.wordsWithCounts);
+        double maxValue = 0.;
+        double threshold = 0.;
+        for (Map.Entry<String, Double> entry : sortedMap.entrySet()) {
+            if (entry.getValue() > maxValue) {
+                maxValue = entry.getValue();
+                threshold = maxValue * wordThreshold;
+            }
+            if (entry.getValue() > threshold) {
+                this.words.remove(entry.getKey());
+            } else {
+                break;
+            }
+        }
+
+        System.out.println("Removed (most frequent) words: " + (prevWordSize - this.words.size()));
+
+
+        // do the transformations here
+
+
 
         System.out.println("Starting step 4");
         /**
@@ -162,5 +195,23 @@ public class BayesTextClassifier {
             }
         }
         return label;
+    }
+
+
+    public static <K extends Comparable,V extends Comparable> Map<K,V> sortByValues(Map<K,V> map){
+        List<Map.Entry<K,V>> entries = new LinkedList<Map.Entry<K,V>>(map.entrySet());
+        Collections.sort(entries, new Comparator<Map.Entry<K,V>>() {
+            @Override
+            public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2) {
+                return -1 * o1.getValue().compareTo(o2.getValue());
+            }
+        });
+        //LinkedHashMap will keep the keys in the order they are inserted
+        //which is currently sorted on natural ordering
+        Map<K,V> sortedMap = new LinkedHashMap<K,V>();
+        for(Map.Entry<K,V> entry: entries){
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+        return sortedMap;
     }
 }

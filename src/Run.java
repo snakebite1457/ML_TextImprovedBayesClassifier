@@ -8,7 +8,7 @@ import java.util.Map;
  * machine learning summer term 2014
  */
 public class Run {
-    private final static boolean DEBUG = true;
+    private final static boolean DEBUG = false;
     private static ArrayList<Document> trainDocuments = new ArrayList<>();
     private static ArrayList<Document> testDocuments = new ArrayList<>();
     private static ArrayList<Document> classifyDocuments = new ArrayList<>();
@@ -91,7 +91,7 @@ public class Run {
                     else
                         testDocuments.add(document);
                 } else {
-                    if (Math.random() < 0.76) {
+                    if (Math.random() < 0.78) {
                         trainDocuments.add(document);
                     } else {
                         testDocuments.add(document);
